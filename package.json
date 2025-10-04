@@ -5,12 +5,28 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "upload": "node scripts/upload-simple.js",
+    "embed": "node scripts/embed-publications.js"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "@langchain/community": "^0.3.57",
+    "@langchain/google-genai": "^0.2.18",
+    "axios": "^1.12.2",
+    "cheerio": "^1.1.2",
+    "clsx": "^2.1.1",
+    "convex": "^1.27.3",
+    "d3": "^7.9.0",
+    "langchain": "^0.3.35",
+    "lucide-react": "^0.544.0",
+    "next": "15.5.4",
+    "papaparse": "^5.5.3",
     "react": "19.1.0",
     "react-dom": "19.1.0",
-    "next": "15.5.4"
+    "react-force-graph-2d": "^1.29.0",
+    "recharts": "^3.2.1",
+    "tailwind-merge": "^3.3.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
