@@ -4,7 +4,7 @@ import { action, internalMutation } from "./_generated/server.js";
 import { internal, api } from "./_generated/api.js";
 import { v } from "convex/values";
 
-const apiKey = process.env.GOOGLE_API_KEY || "AIzaSyAyPxWzR6hUyJnEvcfr7QM89zE3In9cKNM";
+const apiKey = process.env.NEXT_PUBLIC_GOOGLE_GEMINI_AI_API_KEY;
 
 if (!apiKey) {
   throw new Error("❌ Missing GOOGLE_API_KEY");

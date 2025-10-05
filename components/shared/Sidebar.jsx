@@ -2,18 +2,11 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  Home,
-  Search,
-  MessageSquare,
-  BarChart3,
-} from "lucide-react";
+import { Home, Search, Lightbulb, Network, BarChart3 } from "lucide-react";
 
 const menuItems = [
   { href: "/dashboard", label: "Overview", icon: Home },
   { href: "/dashboard/search", label: "Search", icon: Search },
-  { href: "/dashboard/chat", label: "AI Chat", icon: MessageSquare },
-  { href: "/dashboard/analytics", label: "Analytics", icon: BarChart3 },
 ];
 
 export default function Sidebar() {
@@ -25,7 +18,7 @@ export default function Sidebar() {
         {menuItems.map((item) => {
           const isActive = pathname === item.href;
           const Icon = item.icon;
-          
+
           return (
             <Link
               key={item.href}

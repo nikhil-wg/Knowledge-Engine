@@ -15,6 +15,7 @@ import type {
 } from "convex/server";
 import type * as analytics from "../analytics.js";
 import type * as embeddings from "../embeddings.js";
+import type * as insights from "../insights.js";
 import type * as publications from "../publications.js";
 import type * as search from "../search.js";
 
@@ -29,6 +30,7 @@ import type * as search from "../search.js";
 declare const fullApi: ApiFromModules<{
   analytics: typeof analytics;
   embeddings: typeof embeddings;
+  insights: typeof insights;
   publications: typeof publications;
   search: typeof search;
 }>;

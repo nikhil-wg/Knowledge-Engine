@@ -1,6 +1,6 @@
 const { ConvexHttpClient } = require("convex/browser");
 
-const CONVEX_URL = "https://valiant-shrimp-391.convex.cloud";
+const CONVEX_URL = "";
 
 if (!CONVEX_URL) {
   console.error("❌ Error: CONVEX_URL not provided");
