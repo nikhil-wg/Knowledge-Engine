@@ -2,7 +2,7 @@ import { action } from "./_generated/server.js";
 import { api } from "./_generated/api.js";
 import { v } from "convex/values";
 
-const apiKey = process.env.GOOGLE_API_KEY;
+const apiKey = process.env.GOOGLE_GEMINI_AI_API_KEY || process.env.GOOGLE_API_KEY;
 
 export const generateOverallInsights = action({
   args: {},

@@ -3,13 +3,11 @@ import { TaskType } from "@google/generative-ai";
 import { action, internalMutation } from "./_generated/server.js";
 import { internal, api } from "./_generated/api.js";
 import { v } from "convex/values";
-
-const apiKey = process.env.NEXT_PUBLIC_GOOGLE_GEMINI_AI_API_KEY;
+const apiKey = process.env.GOOGLE_GEMINI_AI_API_KEY || process.env.GOOGLE_API_KEY;
 
 if (!apiKey) {
-  throw new Error("❌ Missing GOOGLE_API_KEY");
+  throw new Error("❌ Missing API key. Use GOOGLE_GEMINI_AI_API_KEY or GOOGLE_API_KEY");
 }
-
 // Internal mutation to store embeddings
 export const storeEmbedding = internalMutation({
   args: {
