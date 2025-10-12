@@ -1,13 +1,17 @@
+// convex/embeddings.js
 import { GoogleGenerativeAIEmbeddings } from "@langchain/google-genai";
 import { TaskType } from "@google/generative-ai";
 import { action, internalMutation } from "./_generated/server.js";
 import { internal, api } from "./_generated/api.js";
 import { v } from "convex/values";
-const apiKey = process.env.GOOGLE_GEMINI_AI_API_KEY || process.env.GOOGLE_API_KEY;
+
+// ✅ Use only the secret key — no NEXT_PUBLIC here
+const apiKey = process.env.GOOGLE_GEMINI_AI_API_KEY;
 
 if (!apiKey) {
-  throw new Error("❌ Missing API key. Use GOOGLE_GEMINI_AI_API_KEY or GOOGLE_API_KEY");
+  throw new Error("❌ Missing GOOGLE_GEMINI_AI_API_KEY in Convex environment");
 }
+
 // Internal mutation to store embeddings
 export const storeEmbedding = internalMutation({
   args: {
@@ -130,7 +134,8 @@ export const searchPublications = action({
     return uniquePublications;
   },
 });
-// ✅ FIXED: Use models that are actually available
+
+// ✅ FIXED: Use correct model names and safe context
 export const answerQuestion = action({
   args: {
     question: v.string(),
@@ -161,7 +166,6 @@ export const answerQuestion = action({
       };
     }
 
-    // Build context from results
     const context = results
       .map((doc, i) => {
         const title = doc.metadata?.title || "Unknown Source";
@@ -170,40 +174,36 @@ export const answerQuestion = action({
       })
       .join("\n\n");
 
-    console.log("Context length:", context.length);
+    // ✅ Trim context safely
+    const safeContext = context.length > 20000 ? context.substring(0, 20000) : context;
 
-    // ✅ FIX: Use models that are available with your API key
-    const { GoogleGenerativeAI } = require("@google/generative-ai");
+    const { GoogleGenerativeAI } = await import("@google/generative-ai");
     const genAI = new GoogleGenerativeAI(apiKey);
-    
+
+    // ✅ Correct model names
     const modelNames = [
-      "gemini-2.0-flash",           // ✅ Available
-      "gemini-2.5-flash",           // ✅ Available
-      "gemini-flash-latest",        // ✅ Available
-      "gemini-2.0-pro-exp",         // ✅ Available
-      "gemini-pro-latest",          // ✅ Available
+      "gemini-1.5-flash",
+      "gemini-1.5-flash-latest",
+      "gemini-1.5-pro",
+      "gemini-1.5-pro-latest",
     ];
 
     let answer = null;
     let lastError = null;
     let usedModel = null;
 
-    // Try each model until one works
     for (const modelName of modelNames) {
       try {
-        console.log(`Trying model: ${modelName}`);
         const model = genAI.getGenerativeModel({ model: modelName });
-
         const prompt = `Based on the following NASA bioscience research publications, answer this question: ${args.question}
 
 Context from research papers:
-${context.substring(0, 30000)}
+${safeContext}
 
 Instructions:
 - Provide a detailed, scientific answer
-- If you find information about inflammation or specific topics, mention which publication(s) it came from
-- Provide an overview of the relevant findings
-- Be specific about which sources support which claims
+- Mention specific findings and publications when possible
+- Be concise but thorough
 
 Answer:`;
 
@@ -211,94 +211,55 @@ Answer:`;
         answer = result.response.text();
         usedModel = modelName;
         console.log(`✅ Success with model: ${modelName}`);
-        break; // Success, exit loop
+        break;
       } catch (error) {
         console.log(`❌ Failed with ${modelName}:`, error.message);
         lastError = error;
-        continue; // Try next model
+        continue;
       }
     }
 
-    // If all models failed, return error with sources
     if (!answer) {
-      console.error("All models failed. Last error:", lastError?.message);
-      
-      const sources = [];
-      const seenIds = new Set();
-
-      for (const doc of results) {
-        const pubId = doc.metadata?.publicationId;
-        if (pubId && !seenIds.has(pubId)) {
-          seenIds.add(pubId);
-          try {
-            const pub = await ctx.runQuery(api.publications.getById, { id: pubId });
-            if (pub) {
-              sources.push({
-                title: pub.title,
-                url: pub.url,
-                snippet: doc.text?.substring(0, 200) || "",
-              });
-            }
-          } catch (err) {
-            sources.push({
-              title: doc.metadata?.title || "Unknown Title",
-              url: doc.metadata?.url || "",
-              snippet: doc.text?.substring(0, 200) || "",
-            });
-          }
-        }
-      }
+      const sources = results
+        .filter(r => r.metadata?.publicationId)
+        .map(r => ({
+          title: r.metadata?.title || "Unknown",
+          url: r.metadata?.url || "",
+          snippet: r.text?.substring(0, 200) || ""
+        }))
+        .slice(0, 5);
 
       return {
         question: args.question,
-        answer: `I couldn't generate an AI answer. Error: ${lastError?.message}. However, I found ${sources.length} relevant publications listed below.`,
+        answer: `I couldn't generate an answer. Please check the Convex logs.`,
         sources,
         error: lastError?.message,
       };
     }
 
-    // Get sources
-    const sources = [];
-    const seenIds = new Set();
-
-    for (const doc of results) {
-      const pubId = doc.metadata?.publicationId;
-      
-      if (pubId && !seenIds.has(pubId)) {
-        seenIds.add(pubId);
-        
-        try {
-          const pub = await ctx.runQuery(api.publications.getById, { id: pubId });
-          
-          if (pub) {
-            sources.push({
-              title: pub.title || "Unknown Title",
-              url: pub.url || "",
-              snippet: doc.text?.substring(0, 200) || "No snippet available",
-            });
-          } else {
-            sources.push({
-              title: doc.metadata?.title || "Unknown Title",
-              url: doc.metadata?.url || "",
-              snippet: doc.text?.substring(0, 200) || "",
-            });
-          }
-        } catch (error) {
-          console.log("Error fetching publication:", error.message);
-          sources.push({
-            title: doc.metadata?.title || "Unknown Title",
-            url: doc.metadata?.url || "",
-            snippet: doc.text?.substring(0, 200) || "",
-          });
-        }
-      }
-    }
+    const sources = results
+      .filter(r => r.metadata?.publicationId)
+      .map(r => ({
+        title: r.metadata?.title || "Unknown",
+        url: r.metadata?.url || "",
+        snippet: r.text?.substring(0, 200) || ""
+      }))
+      .slice(0, 5);
 
     return {
       question: args.question,
       answer,
       sources,
-      modelUsed: usedModel, // Show which model was used
+      modelUsed: usedModel,
     };
   },
 });
+
+// Utility function
+function splitTextIntoChunks(text, maxLength) {
+  const chunks = [];
+  for (let i = 0; i < text.length; i += maxLength) {
+    chunks.push(text.slice(i, i + maxLength));
+  }
+  return chunks;
+}
