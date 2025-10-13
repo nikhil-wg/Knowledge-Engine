@@ -18,6 +18,8 @@ import type * as embeddings from "../embeddings.js";
 import type * as insights from "../insights.js";
 import type * as publications from "../publications.js";
 import type * as search from "../search.js";
+import type * as sync from "../sync.js";
+import type * as testGemini from "../testGemini.js";
 
 /**
  * A utility for referencing Convex functions in your app's API.
@@ -33,6 +35,8 @@ declare const fullApi: ApiFromModules<{
   insights: typeof insights;
   publications: typeof publications;
   search: typeof search;
+  sync: typeof sync;
+  testGemini: typeof testGemini;
 }>;
 export declare const api: FilterApi<
   typeof fullApi,
