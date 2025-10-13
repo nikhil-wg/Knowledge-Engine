@@ -64,7 +64,7 @@ echo "NEXT_PUBLIC_CONVEX_URL=your-convex-url" > .env.local
 npm run dev
 
 ## 💻 Run Locally (Optional)
-
+```
 
 
 ## 🙌 Acknowledgements
