@@ -7,6 +7,12 @@ An AI-powered semantic search system built during the **NASA International Space
 
 ---
 
+## 🎥 Demo
+
+🎥 Watch the 2-minute demo:  https://drive.google.com/file/d/1qO2ABX6hzPrrzB0yKeGug_h6WgOS_RiB/view?usp=drive_link
+
+---
+
 ## 🌟 Features
 
 - **Semantic Search** – Find relevant NASA research using vector embeddings
@@ -41,11 +47,6 @@ An AI-powered semantic search system built during the **NASA International Space
 
 ---
 
-## 🎥 Demo
-
-🎥 Watch the 2-minute demo:  https://drive.google.com/file/d/1qO2ABX6hzPrrzB0yKeGug_h6WgOS_RiB/view?usp=drive_link
-
----
 ## 💻 Run Locally (Optional)
 
 ```bash
